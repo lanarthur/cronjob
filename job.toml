@@ -1,0 +1,7 @@
+[cron_job]
+    [cron_job.red]
+        spec="@every 3s"
+    [cron_job.mike]
+        spec="@every 4s"
+    [cron_job.jake]
+        spec="@every 5s"

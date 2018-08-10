@@ -1,9 +1,9 @@
 package example
 
 import (
+	"errors"
 	"fmt"
 	"github.com/lanarthur/cronjob/job"
-	"errors"
 	"time"
 )
 
@@ -18,7 +18,6 @@ func NewRedJob(name string) job.Job {
 }
 
 func (this red) Run() (err error) {
-	//time.Sleep(time.Duration(3)*time.Second)
 	fmt.Printf("%s ---, now:%s\n", this.name, time.Now().String())
 	err = errors.New("err from red")
 	return

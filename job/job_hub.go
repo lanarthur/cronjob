@@ -1,19 +1,9 @@
-/*
- * Copyright © 2018 上海讯联数据服务有限公司. All rights reserved.
- *
- * 上海讯联数据服务有限公司（以下简称“讯联数据”）拥有此源程序的完全知识产权，
- * 未经讯联数据书面授权许可，任何人或公司（不论以何种方式获得此源程序）不得擅自
- * 使用、复制、修改、二次开发、转发、售卖此源程序、相应的软件产品以及其他衍生品。
- * 否则，讯联数据将依法追究法律责任。
- *
- */
-
 package job
 
 import (
 	"fmt"
-	"github.com/CardInfoLink/coupon/config"
-	"github.com/CardInfoLink/coupon/util/cron"
+	"github.com/lanarthur/cronjob/config"
+	"github.com/lanarthur/cronjob/cron"
 	"log"
 )
 
@@ -116,7 +106,7 @@ type Task struct {
 
 // task为任务单元，多个任务单元组成任务,
 func (this *cronJob) ListTask() (ret []*Task) {
-	tasks := this.cron.Entries()
+	tasks := this.cron.Jobs()
 	for _, v := range tasks {
 		task := &Task{}
 		task.Name = v.Name

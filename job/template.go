@@ -1,6 +1,5 @@
 package job
 
-
 type Job interface {
 	// cron任务实现
 	Run() (err error)

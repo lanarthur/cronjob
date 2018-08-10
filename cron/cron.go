@@ -32,12 +32,12 @@ func newError(err error) (this *Error) {
 // specified by the schedule. It may be started, stopped, and the running may
 // be inspected while running.
 type Cron struct {
-	running []*job
-	stopped []*job
-	add chan *job
-	stop chan string
-	remove chan string
-	exit chan struct{}
+	running  []*job
+	stopped  []*job
+	add      chan *job
+	stop     chan string
+	remove   chan string
+	exit     chan struct{}
 	status   string
 	ErrorLog *log.Logger
 	location *time.Location
@@ -57,10 +57,10 @@ type Schedule interface {
 
 // job consists of a schedule and the func to execute on that schedule.
 type job struct {
-	name string
-	hasFail bool
-	err *Error
-	status string
+	Name    string
+	HasFail bool
+	Err     *Error
+	Status  string
 
 	// The schedule on which this job should be run.
 	Schedule Schedule
@@ -143,7 +143,7 @@ func (c *Cron) AddJob(name, spec string, cmd Job) error {
 // RemoveJob remove job from cron accord job name
 func (c *Cron) RemoveJob(name string) {
 	for k, v := range c.stopped {
-		if v.name == name {
+		if v.Name == name {
 			c.stopped = append(c.stopped[:k], c.stopped[k+1:]...)
 			return
 		}
@@ -164,20 +164,20 @@ type JobStatus struct {
 func (c *Cron) JobStatus(name string) (ret *JobStatus) {
 	ret = &JobStatus{}
 	for _, v := range c.running {
-		if v.name == name {
-			ret.Name = v.name
+		if v.Name == name {
+			ret.Name = v.Name
 			ret.Status = statusRun
-			ret.HasFail = v.hasFail
-			ret.Err = v.err
+			ret.HasFail = v.HasFail
+			ret.Err = v.Err
 			return
 		}
 	}
 	for _, v := range c.stopped {
-		if v.name == name {
-			ret.Name = v.name
+		if v.Name == name {
+			ret.Name = v.Name
 			ret.Status = statusStop
-			ret.HasFail = v.hasFail
-			ret.Err = v.err
+			ret.HasFail = v.HasFail
+			ret.Err = v.Err
 			return
 		}
 	}
@@ -194,11 +194,11 @@ func (c *Cron) StopJob(name string) {
 func (c *Cron) RunJob(name string) {
 	var e *job
 	for k, v := range c.stopped {
-		if v.name == name {
+		if v.Name == name {
 			e = &job{
-				name:     v.name,
-				hasFail:  v.hasFail,
-				err:      v.err,
+				Name:     v.Name,
+				HasFail:  v.HasFail,
+				Err:      v.Err,
 				Job:      v.Job,
 				Next:     v.Next,
 				Prev:     v.Prev,
@@ -222,9 +222,9 @@ func (c *Cron) RunJob(name string) {
 // Schedule adds a Job to the Cron to be run on the given schedule.
 func (c *Cron) Schedule(name string, schedule Schedule, cmd Job) error {
 	entry := &job{
-		name:     name,
-		hasFail:  false,
-		err:      &Error{},
+		Name:     name,
+		HasFail:  false,
+		Err:      &Error{},
 		Schedule: schedule,
 		Job:      cmd,
 	}
@@ -286,8 +286,8 @@ func (c *Cron) runWithRecovery(e *job) {
 	}()
 	err := e.Job.Run()
 	if err != nil {
-		e.err = newError(err)
-		e.hasFail = true
+		e.Err = newError(err)
+		e.HasFail = true
 	}
 	return
 }
@@ -340,7 +340,7 @@ func (c *Cron) run() {
 			case stopName := <-c.stop:
 				timer.Stop()
 				for k, v := range c.running {
-					if v.name == stopName {
+					if v.Name == stopName {
 						c.stopped = append(c.stopped, v)
 						c.running = append(c.running[:k], c.running[k+1:]...)
 						break
@@ -350,13 +350,13 @@ func (c *Cron) run() {
 			case removeName := <-c.remove:
 				timer.Stop()
 				for k, v := range c.running {
-					if v.name == removeName {
+					if v.Name == removeName {
 						c.running = append(c.running[:k], c.running[k+1:]...)
 						break
 					}
 				}
 				for k, v := range c.stopped {
-					if v.name == removeName {
+					if v.Name == removeName {
 						c.stopped = append(c.stopped[:k], c.stopped[k+1:]...)
 						break
 					}
@@ -384,10 +384,10 @@ func (c *Cron) jobSnapshot() []*job {
 	var entries []*job
 	for _, e := range c.running {
 		entries = append(entries, &job{
-			name:     e.name,
-			status:   statusRun,
-			hasFail:  e.hasFail,
-			err:      e.err,
+			Name:     e.Name,
+			Status:   statusRun,
+			HasFail:  e.HasFail,
+			Err:      e.Err,
 			Schedule: e.Schedule,
 			Next:     e.Next,
 			Prev:     e.Prev,
@@ -396,10 +396,10 @@ func (c *Cron) jobSnapshot() []*job {
 	}
 	for _, e := range c.stopped {
 		entries = append(entries, &job{
-			name:     e.name,
-			status:   statusStop,
-			hasFail:  e.hasFail,
-			err:      e.err,
+			Name:     e.Name,
+			Status:   statusStop,
+			HasFail:  e.HasFail,
+			Err:      e.Err,
 			Schedule: e.Schedule,
 			Next:     e.Next,
 			Prev:     e.Prev,
